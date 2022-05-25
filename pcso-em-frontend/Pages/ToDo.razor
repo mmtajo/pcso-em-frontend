@@ -4,16 +4,7 @@
 @using System.Text.Json.Serialization;
 @using System.Net.Http.Headers
 
-
-<h1>Welcome ToDo Page - here we will consume the new API</h1>
-
-@*<h3>@jsonData</h3>*@
-
-@if(todoList == null)
-{
-    <p><em>Loading...</em></p>
-} 
-else
+@if(todoList != null)
 {
     <table class="table">
         <thead>
@@ -48,12 +39,12 @@ else
  <MudButton Variant="Variant.Filled" 
             EndIcon="@Icons.Material.Filled.Send" 
             OnClick="InvokeJavaScript"
-            Color="Color.Primary">Update App</MudButton>
+            Color="Color.Info">Update App</MudButton>
 
 <MudButton Variant="Variant.Filled" 
             EndIcon="@Icons.Material.Filled.Send"
             OnClick="DeleteAll"
-            Color="Color.Primary">Delete List</MudButton>
+            Color="Color.Error">Delete List</MudButton>
 
 
 @code {
@@ -68,6 +59,8 @@ else
     {
         HttpClient httpClient = new HttpClient();
         await httpClient.DeleteAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
+        await GetListAsync();
+        StateHasChanged();
     }
 
     private async void AddTodo()
@@ -89,10 +82,18 @@ else
 
         jsonData = await httpClient.GetStringAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
 
-        todoList = JsonSerializer.Deserialize<List<ToDoItem>>(jsonData);
-        name = null;
-        message = null;
+        await GetListAsync();
+
         StateHasChanged();
+    }
+
+    private async Task GetListAsync()
+    {
+        HttpClient httpClient = new HttpClient();
+        jsonData = await httpClient.GetStringAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
+
+        todoList = JsonSerializer.Deserialize<List<ToDoItem>>(jsonData);
+        message = null;
     }
 
     private async void InvokeJavaScript()
