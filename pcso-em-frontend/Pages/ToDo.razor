@@ -2,6 +2,7 @@
 @inject IJSRuntime JS
 @using System.Text.Json;
 @using System.Text.Json.Serialization;
+@using System.Net.Http.Headers
 
 
 <h1>Welcome ToDo Page - here we will consume the new API</h1>
@@ -35,21 +36,62 @@ else
     </table>
 }
 
-<button class="btn btn-primary" @onclick="AddTodo">Add To Do</button>
-<button class="btn btn-primary" @onclick="InvokeJavaScript">Invoke JavaScript</button>
+<MudTextField @bind-Value="name" Label="Name" Variant="Variant.Outlined"></MudTextField>
+<MudTextField @bind-Value="message" Label="Message" Variant="Variant.Outlined"></MudTextField>
+
+<br /><br />
+ <MudButton Variant="Variant.Filled" 
+            EndIcon="@Icons.Material.Filled.Send" 
+            OnClick="AddTodo"
+            Color="Color.Primary">Add</MudButton>
+
+ <MudButton Variant="Variant.Filled" 
+            EndIcon="@Icons.Material.Filled.Send" 
+            OnClick="InvokeJavaScript"
+            Color="Color.Primary">Update App</MudButton>
+
+<MudButton Variant="Variant.Filled" 
+            EndIcon="@Icons.Material.Filled.Send"
+            OnClick="DeleteAll"
+            Color="Color.Primary">Delete List</MudButton>
+
 
 @code {
     private int count = 0;
     private string? jsonData;
     private List<ToDoItem> todoList;
 
+    private string name;
+    private string message;
+
+    private async void DeleteAll()
+    {
+        HttpClient httpClient = new HttpClient();
+        await httpClient.DeleteAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
+    }
+
     private async void AddTodo()
     {
         count++;
         HttpClient httpClient = new HttpClient();
+        ToDoItem toDoItemPost = new ToDoItem
+            {
+                message = message,
+                name = name,
+                created = DateTime.Now
+            };
+        string myContent = JsonSerializer.Serialize(toDoItemPost);
+        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
+        ByteArrayContent byteContent = new ByteArrayContent(buffer);
+        byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+        await httpClient.PostAsync("https://pcso-em-backend.azurewebsites.net/todoitems", byteContent);
+
         jsonData = await httpClient.GetStringAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
 
         todoList = JsonSerializer.Deserialize<List<ToDoItem>>(jsonData);
+        name = null;
+        message = null;
         StateHasChanged();
     }
 
