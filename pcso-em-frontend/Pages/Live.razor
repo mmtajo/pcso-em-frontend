@@ -35,6 +35,7 @@
         .WithUrl("https://pcso-em-backend.azurewebsites.net/chat")
         .Build();
 
+
         hubConnection.On<string, string>("Receive", (name, message) => {
             var encodedMsg = $"{name} {message}";
             messages.Add(encodedMsg);
