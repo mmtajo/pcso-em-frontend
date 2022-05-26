@@ -7,8 +7,22 @@
     @foreach (var message in messages)
     {
         <MudCard>
-            <MudCardContent>
-                <MudText Typo="Typo.body2">@message</MudText>
+            <MudCardContent Class="d-flex flex-grow-1 gap-4">
+                @if(message.name == "BARBS")
+                {
+                    <MudCardMedia Image="images/barbs.jpg" style="width:50px; height:50px"/>
+                } else if(message.name == "JEM")
+                {
+                    <MudCardMedia Image="images/sample2.jpg" style="width:50px; height:50px"/>
+                } else if(message.name == "EM")
+                {
+                    <MudCardMedia Image="images/em.jpg" style="width:50px; height:50px"/>
+                } else if(message.name == "JOSEPH")
+                {
+                    <MudCardMedia Image="images/sample3.jpg" style="width:50px; height:50px"/>
+                }
+                <MudText Class="d-flex py-8" Typo="Typo.body1">@message.name</MudText>
+                <MudText Class="d-flex py-8" Typo="Typo.body2">@message.message</MudText>
             </MudCardContent>
         </MudCard>
         <br />
@@ -25,7 +39,7 @@
 
 @code {
     private HubConnection? hubConnection;
-    private List<string> messages = new List<string>();
+    private List<Message> messages = new List<Message>();
     private string? name;
     private string? message;
 
@@ -37,8 +51,11 @@
 
 
         hubConnection.On<string, string>("Receive", (name, message) => {
-            var encodedMsg = $"{name} {message}";
-            messages.Add(encodedMsg);
+            //var encodedMsg = $"{name} {message}";
+            Message msg = new Message();
+            msg.name = name;
+            msg.message = message;
+            messages.Add(msg);
             StateHasChanged();
         });
 
@@ -62,5 +79,12 @@
         {
             await hubConnection.DisposeAsync();
         }
+    }
+
+    public class Message
+    {
+        public string? name { get; set; }
+        public string? message { get; set; }
+        
     }
 }
