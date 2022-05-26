@@ -6,7 +6,19 @@
 
 @if(todoList != null)
 {
-    <table class="table">
+    @foreach(var todo in todoList)
+    {
+        <MudCard>
+            <MudCardMedia Image="images/sample.jpg" Height="50"/>
+            <MudCardContent>
+                <MudText Typo="Typo.h5" Color.Primary>@todo.name</MudText>
+                <MudText Typo="Typo.body1">@todo.message</MudText>
+                <MudText Typo="Typo.body2">@todo.created</MudText>
+            </MudCardContent>
+        </MudCard>
+        <br />
+    }
+@*    <table class="table">
         <thead>
             <tr>
                 <th>Name</th>
@@ -24,13 +36,14 @@
                 </tr>
             }
         </tbody>
-    </table>
+    </table>*@
 }
 
 <MudTextField @bind-Value="name" Label="Name" Variant="Variant.Outlined"></MudTextField>
 <MudTextField @bind-Value="message" Label="Message" Variant="Variant.Outlined"></MudTextField>
 
-<br /><br />
+<br />
+
  <MudButton Variant="Variant.Filled" 
             EndIcon="@Icons.Material.Filled.Send" 
             OnClick="AddTodo"
@@ -50,15 +63,25 @@
 @code {
     private int count = 0;
     private string? jsonData;
-    private List<ToDoItem> todoList;
+    private List<ToDoItem>? todoList;
 
-    private string name;
-    private string message;
+    private string? name;
+    private string? message;
+
+    private string? url;
+    //private string localURL = "https://localhost:7199/todoitems";
+
+    protected async override Task OnInitializedAsync()
+    {
+        await GetListAsync();
+        await base.OnInitializedAsync();
+    }
 
     private async void DeleteAll()
     {
         HttpClient httpClient = new HttpClient();
-        await httpClient.DeleteAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
+        url = "https://pcso-em-backend.azurewebsites.net/todoitems";
+        await httpClient.DeleteAsync(url);
         await GetListAsync();
         StateHasChanged();
     }
@@ -67,6 +90,7 @@
     {
         count++;
         HttpClient httpClient = new HttpClient();
+
         ToDoItem toDoItemPost = new ToDoItem
             {
                 message = message,
@@ -78,9 +102,10 @@
         ByteArrayContent byteContent = new ByteArrayContent(buffer);
         byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-        await httpClient.PostAsync("https://pcso-em-backend.azurewebsites.net/todoitems", byteContent);
+        url = "https://pcso-em-backend.azurewebsites.net/todoitems";
 
-        jsonData = await httpClient.GetStringAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
+        await httpClient.PostAsync(url, byteContent);
+        jsonData = await httpClient.GetStringAsync(url);
 
         await GetListAsync();
 
@@ -90,7 +115,8 @@
     private async Task GetListAsync()
     {
         HttpClient httpClient = new HttpClient();
-        jsonData = await httpClient.GetStringAsync("https://pcso-em-backend.azurewebsites.net/todoitems");
+        url = "https://pcso-em-backend.azurewebsites.net/todoitems";
+        jsonData = await httpClient.GetStringAsync(url);
 
         todoList = JsonSerializer.Deserialize<List<ToDoItem>>(jsonData);
         message = null;
@@ -106,9 +132,9 @@
     public class ToDoItem
     {
         public int id { get; set; }
-        public string name { get; set; }
+        public string? name { get; set; }
         public bool isComplete { get; set; }
-        public string message { get; set; }
+        public string? message { get; set; }
         public DateTime created { get; set; }
     }
 
