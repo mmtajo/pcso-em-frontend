@@ -2,24 +2,25 @@
 @implements IAsyncDisposable
 @using Microsoft.AspNetCore.SignalR.Client
 
+
 @if (messages != null)
 {
     @foreach (var message in messages)
     {
         <MudCard>
-            <MudCardContent Class="d-flex flex-grow-1 gap-4">
+            <MudCardContent Class="d-flex flex-grow-1 gap-4" Style="align-items: center;">
                 @if(message.name == "BARBS")
                 {
-                    <MudCardMedia Image="images/barbs.jpg" style="width:50px; height:50px"/>
+                    <MudCardMedia Image="images/barbs.jpg" style="width:50px; height:50px; border-radius:25px; border:1px solid #c3baba"/>
                 } else if(message.name == "JEM")
                 {
-                    <MudCardMedia Image="images/sample2.jpg" style="width:50px; height:50px"/>
+                    <MudCardMedia Image="images/sample2.jpg" style="width:50px; height:50px; border-radius:25px; border:1px solid #c3baba"/>
                 } else if(message.name == "EM")
                 {
-                    <MudCardMedia Image="images/em.jpg" style="width:50px; height:50px"/>
+                    <MudCardMedia Image="images/em.jpg" style="width:50px; height:50px; border-radius:25px; border:1px solid #c3baba"/>
                 } else if(message.name == "JOSEPH")
                 {
-                    <MudCardMedia Image="images/sample3.jpg" style="width:50px; height:50px"/>
+                    <MudCardMedia Image="images/sample3.jpg" style="width:50px; height:50px; border-radius:25px; border:1px solid #c3baba"/>
                 }
                 <MudText Class="d-flex py-8" Typo="Typo.body1">@message.name</MudText>
                 <MudText Class="d-flex py-8" Typo="Typo.body2">@message.message</MudText>
@@ -43,10 +44,13 @@
     private string? name;
     private string? message;
 
+    private string? reqURL;
+
     protected override async Task OnInitializedAsync()
     {
+        reqURL = "https://pcso-em-backend.azurewebsites.net/chat";
         hubConnection = new HubConnectionBuilder()
-        .WithUrl("https://pcso-em-backend.azurewebsites.net/chat")
+        .WithUrl(reqURL)
         .Build();
 
 
